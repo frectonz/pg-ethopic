@@ -6,7 +6,10 @@ use pgrx::{prelude::*, AnyElement};
 ::pgrx::pg_module_magic!();
 
 #[pg_extern]
-fn ethopic(any: AnyElement) -> Option<String> {
+fn ethopic(
+    any: AnyElement,
+    date_format: default!(String, "'{month} {day}, {year}'"),
+) -> Option<String> {
     let date = match any.oid() {
         pg_sys::DATEOID => any.datum().try_into().ok().map(ethopic_from_date),
         pg_sys::TIMESTAMPOID => any.datum().try_into().ok().map(ethopic_from_timestamp),
@@ -14,7 +17,7 @@ fn ethopic(any: AnyElement) -> Option<String> {
         _ => None,
     };
 
-    date.map(to_string)
+    date.map(|date| to_string(date, date_format))
 }
 
 fn ethopic_from_date(date: Date) -> EthiopianYear {
@@ -44,12 +47,11 @@ fn ethopic_from_timestampz(date: TimestampWithTimeZone) -> EthiopianYear {
     .into()
 }
 
-fn to_string(date: EthiopianYear) -> String {
-    let day = date.day();
-    let month = date.amharic_month();
-    let year = date.formatted_year();
-
-    format!("{month} {day}, {year}")
+fn to_string(date: EthiopianYear, date_format: String) -> String {
+    date_format
+        .replace("{day}", &date.day().to_string())
+        .replace("{month}", date.amharic_month())
+        .replace("{year}", &date.formatted_year())
 }
 
 #[cfg(any(test, feature = "pg_test"))]
