@@ -1,10 +1,22 @@
+use ethiopic_calendar::{EthiopianYear, GregorianYear};
 use pgrx::prelude::*;
 
 ::pgrx::pg_module_magic!();
 
 #[pg_extern]
-fn hello_pg_ethopic() -> &'static str {
-    "Hello, pg_ethopic"
+fn ethopic(date: Date) -> String {
+    let date: EthiopianYear = GregorianYear::new(
+        date.year() as usize,
+        date.month() as usize,
+        date.day() as usize,
+    )
+    .into();
+
+    let month = date.amharic_month();
+    let day = date.day();
+    let year = date.formatted_year();
+
+    format!("{month} {day}, {year}")
 }
 
 #[cfg(any(test, feature = "pg_test"))]
@@ -14,9 +26,9 @@ mod tests {
 
     #[pg_test]
     fn test_hello_pg_ethopic() {
-        assert_eq!("Hello, pg_ethopic", crate::hello_pg_ethopic());
+        let date = Date::new(2004, 3, 29).unwrap();
+        assert_eq!("መጋቢት 20, 1996", crate::ethopic(date));
     }
-
 }
 
 /// This module is required by `cargo pgrx test` invocations.
