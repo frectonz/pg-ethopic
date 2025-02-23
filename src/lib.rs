@@ -5,7 +5,7 @@ use pgrx::{prelude::*, AnyElement};
 
 ::pgrx::pg_module_magic!();
 
-#[pg_extern]
+#[pg_extern(immutable, parallel_safe)]
 fn ethopic(
     any: AnyElement,
     date_format: default!(String, "'{month} {day}, {year}'"),
