@@ -1,12 +1,13 @@
 use core::panic;
 
 use ethiopic_calendar::{EthiopianYear, GregorianYear};
+use ethiopic_numerals::ethiopic;
 use pgrx::{prelude::*, AnyElement};
 
 ::pgrx::pg_module_magic!();
 
 #[pg_extern(immutable, parallel_safe)]
-fn ethopic(
+fn ethopic_date(
     any: AnyElement,
     date_format: default!(String, "'{month} {day}, {year}'"),
 ) -> Option<String> {
@@ -18,6 +19,11 @@ fn ethopic(
     };
 
     date.map(|date| to_string(date, date_format))
+}
+
+#[pg_extern(immutable, parallel_safe)]
+fn ethopic_number(num: AnyNumeric) -> Option<String> {
+    Some(ethiopic(num.abs().to_string().parse::<usize>().ok()?))
 }
 
 fn ethopic_from_date(date: Date) -> EthiopianYear {
