@@ -12,12 +12,6 @@ docker run --network=host frectonz/pg-ethopic
 
 `pg-ethopic` is also distributed with other PostgreSQL versions.
 
-### PostgreSQL 12
-
-```bash
-docker run --network=host frectonz/pg-ethopic:pg12
-```
-
 ### PostgreSQL 13
 
 ```bash
